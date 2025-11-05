@@ -41,6 +41,15 @@ class MahasiswaController extends Controller
     }
 
     // ===============================
+    // SHOW — tampilkan detail mahasiswa + daftar nilai
+    // ===============================
+    public function show($id)
+    {
+        $mhs = Mahasiswa::with(['prodi.fakultas', 'nilai'])->findOrFail($id);
+        return view('mahasiswa.show', compact('mhs'));
+    }
+
+    // ===============================
     // CREATE — form tambah mahasiswa
     // ===============================
     public function create()

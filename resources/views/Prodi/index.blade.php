@@ -1,47 +1,70 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Daftar Program Studi') }}
+        </h2>
+    </x-slot>
 
-@section('content')
-<div class="container py-5">
-    <h2 class="text-center mb-4 text-dark">Daftar Program Studi</h2>
+    <div class="py-10">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+            {{-- Notifikasi --}}
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center shadow">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('prodi.create') }}" class="btn btn-primary">+ Tambah Program Studi</a>
+            {{-- Tombol Tambah --}}
+            <div class="flex justify-end mb-5">
+                <a href="{{ route('prodi.create') }}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
+                    + Tambah Program Studi
+                </a>
+            </div>
+
+            {{-- Tabel --}}
+            <div class="bg-white dark:bg-gray-800 shadow-lg sm:rounded-xl p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-center">
+                        <thead>
+                            <tr class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                <th class="py-3 px-4 border w-20">ID</th>
+                                <th class="py-3 px-4 border">Nama Prodi</th>
+                                <th class="py-3 px-4 border">Fakultas</th>
+                                <th class="py-3 px-4 border w-40">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($prodi as $p)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                    <td class="py-2 border">{{ $p->id }}</td>
+                                    <td class="py-2 border">{{ $p->nama_prodi }}</td>
+                                    <td class="py-2 border">{{ $p->fakultas->nama_fakultas ?? '-' }}</td>
+                                    <td class="py-2 border flex justify-center gap-2">
+                                        <a href="{{ route('prodi.edit', $p->id) }}" 
+                                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
+                                           Edit
+                                        </a>
+                                        <form action="{{ route('prodi.destroy', $p->id) }}" method="POST" 
+                                              onsubmit="return confirm('Yakin ingin menghapus program studi ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="text-gray-500 py-4">Belum ada data program studi.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="card p-3 shadow">
-        <table class="table table-bordered table-striped text-center align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nama Prodi</th>
-                    <th>Fakultas</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($prodi as $p)
-                    <tr>
-                        <td>{{ $p->id }}</td>
-                        <td>{{ $p->nama_prodi }}</td>
-                        <td>{{ $p->fakultas->nama_fakultas ?? '-' }}</td>
-                        <td class="d-flex justify-content-center gap-2">
-                            <a href="{{ route('prodi.edit', $p->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('prodi.destroy', $p->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus prodi ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4" class="text-muted">Belum ada data program studi.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-@endsection
+</x-app-layout>

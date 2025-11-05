@@ -1,45 +1,68 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Daftar Fakultas') }}
+        </h2>
+    </x-slot>
 
-@section('content')
-<div class="container py-5">
-    <h2 class="text-center mb-4 text-dark">Daftar Fakultas</h2>
+    <div class="py-10">
+        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
+            
+            {{-- Notifikasi --}}
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 text-center shadow">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
+            {{-- Tombol Tambah --}}
+            <div class="flex justify-end mb-5">
+                <a href="{{ route('fakultas.create') }}"
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
+                    + Tambah Fakultas
+                </a>
+            </div>
 
-    <div class="d-flex justify-content-end mb-3">
-        <a href="{{ route('fakultas.create') }}" class="btn btn-primary">+ Tambah Fakultas</a>
+            {{-- Tabel --}}
+            <div class="bg-white dark:bg-gray-800 shadow-lg sm:rounded-xl p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-center">
+                        <thead>
+                            <tr class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                                <th class="py-3 px-4 border w-20">ID</th>
+                                <th class="py-3 px-4 border">Nama Fakultas</th>
+                                <th class="py-3 px-4 border w-40">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($fakultas as $f)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+                                    <td class="py-2 border">{{ $f->id }}</td>
+                                    <td class="py-2 border">{{ $f->nama_fakultas }}</td>
+                                    <td class="py-2 border flex justify-center gap-2">
+                                        <a href="{{ route('fakultas.edit', $f->id) }}" 
+                                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
+                                           Edit
+                                        </a>
+                                        <form action="{{ route('fakultas.destroy', $f->id) }}" method="POST" 
+                                              onsubmit="return confirm('Yakin ingin menghapus fakultas ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="text-gray-500 py-4">Belum ada data fakultas.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="card p-3 shadow">
-        <table class="table table-bordered table-striped text-center align-middle">
-            <thead class="table-dark">
-                <tr>
-                    <th>ID</th>
-                    <th>Nama Fakultas</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($fakultas as $f)
-                    <tr>
-                        <td>{{ $f->id }}</td>
-                        <td>{{ $f->nama_fakultas }}</td>
-                        <td class="d-flex justify-content-center gap-2">
-                            <a href="{{ route('fakultas.edit', $f->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="{{ route('fakultas.destroy', $f->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus fakultas ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-danger btn-sm">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="3" class="text-muted">Belum ada data fakultas.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</div>
-@endsection
+</x-app-layout>
