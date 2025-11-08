@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Mahasiswa;
 use App\Models\Fakultas;
@@ -10,56 +11,58 @@ use App\Models\ProgramStudi;
 class MahasiswaController extends Controller
 {
     // ===============================
-    // INDEX — tampilkan daftar mahasiswa + filter
+    // INDEX — Tampilkan semua mahasiswa + filter
     // ===============================
     public function index(Request $request)
     {
-        $fakultas = Fakultas::all();
-
         $query = Mahasiswa::with(['prodi.fakultas']);
 
-        // Filter fakultas
         if ($request->filled('fakultas_id')) {
             $query->whereHas('prodi', function ($q) use ($request) {
                 $q->where('fakultas_id', $request->fakultas_id);
             });
         }
 
-        // Filter prodi
         if ($request->filled('prodi_id')) {
             $query->where('prodi_id', $request->prodi_id);
         }
 
-        // Filter nama
         if ($request->filled('nama')) {
             $query->where('nama', 'like', '%' . $request->nama . '%');
         }
 
         $mahasiswa = $query->get();
 
-        return view('mahasiswa.index', compact('mahasiswa', 'fakultas'));
+        return response()->json([
+            'success' => true,
+            'message' => 'Daftar mahasiswa',
+            'data' => $mahasiswa
+        ]);
     }
 
     // ===============================
-    // SHOW — tampilkan detail mahasiswa + daftar nilai
+    // SHOW — Detail mahasiswa + relasi
     // ===============================
     public function show($id)
     {
-        $mhs = Mahasiswa::with(['prodi.fakultas', 'nilai'])->findOrFail($id);
-        return view('mahasiswa.show', compact('mhs'));
+        $mhs = Mahasiswa::with(['prodi.fakultas', 'nilai'])->find($id);
+
+        if (!$mhs) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Detail mahasiswa',
+            'data' => $mhs
+        ]);
     }
 
     // ===============================
-    // CREATE — form tambah mahasiswa
-    // ===============================
-    public function create()
-    {
-        $fakultas = Fakultas::all();
-        return view('mahasiswa.create', compact('fakultas'));
-    }
-
-    // ===============================
-    // STORE — simpan mahasiswa baru
+    // STORE — Tambah data mahasiswa
     // ===============================
     public function store(Request $request)
     {
@@ -67,61 +70,75 @@ class MahasiswaController extends Controller
             'nim'         => 'required|digits_between:8,12|regex:/^[0-9]+$/|unique:mahasiswa',
             'nama'        => 'required|regex:/^[A-Za-z\s]+$/',
             'fakultas_id' => 'required|exists:fakultas,id',
-            'prodi_id'    => 'required|exists:prodis,id', // ✅ disesuaikan dengan nama tabel di migration
-        ], [
-            'nim.regex' => 'NIM hanya boleh berisi angka.',
-            'nama.regex' => 'Nama hanya boleh huruf dan spasi.',
+            'prodi_id'    => 'required|exists:prodis,id',
         ]);
 
-        Mahasiswa::create([
+        $mhs = Mahasiswa::create([
             'nim' => $request->nim,
             'nama' => $request->nama,
             'prodi_id' => $request->prodi_id,
         ]);
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Mahasiswa berhasil ditambahkan.',
+            'data' => $mhs
+        ], 201);
     }
 
     // ===============================
-    // EDIT — tampilkan form edit
-    // ===============================
-    public function edit($id)
-    {
-        $m = Mahasiswa::findOrFail($id);
-        $fakultas = Fakultas::all();
-        return view('mahasiswa.edit', compact('m', 'fakultas'));
-    }
-
-    // ===============================
-    // UPDATE — perbarui data mahasiswa
+    // UPDATE — Perbarui data mahasiswa
     // ===============================
     public function update(Request $request, $id)
     {
+        $mhs = Mahasiswa::find($id);
+
+        if (!$mhs) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
         $request->validate([
             'nim'         => 'required|digits_between:8,12|regex:/^[0-9]+$/|unique:mahasiswa,nim,' . $id,
             'nama'        => 'required|regex:/^[A-Za-z\s]+$/',
             'fakultas_id' => 'required|exists:fakultas,id',
-            'prodi_id'    => 'required|exists:prodis,id', // ✅ disesuaikan juga
+            'prodi_id'    => 'required|exists:prodis,id',
         ]);
 
-        $m = Mahasiswa::findOrFail($id);
-        $m->update([
+        $mhs->update([
             'nim' => $request->nim,
             'nama' => $request->nama,
             'prodi_id' => $request->prodi_id,
         ]);
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Data mahasiswa berhasil diperbarui.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Mahasiswa berhasil diperbarui.',
+            'data' => $mhs
+        ]);
     }
 
     // ===============================
-    // DESTROY — hapus data mahasiswa
+    // DESTROY — Hapus mahasiswa
     // ===============================
     public function destroy($id)
     {
-        $m = Mahasiswa::findOrFail($id);
-        $m->delete();
+        $mhs = Mahasiswa::find($id);
 
-        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil dihapus.');
+        if (!$mhs) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mahasiswa tidak ditemukan'
+            ], 404);
+        }
+
+        $mhs->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Mahasiswa berhasil dihapus.'
+        ]);
     }
 }

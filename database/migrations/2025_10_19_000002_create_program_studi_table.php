@@ -17,6 +17,6 @@ return new class extends Migration {
 
     public function down(): void
     {
-        Schema::dropIfExists('program_studi');
+        Schema::dropIfExists('prodis'); // ✅ disamakan dengan nama tabel di atas
     }
 };

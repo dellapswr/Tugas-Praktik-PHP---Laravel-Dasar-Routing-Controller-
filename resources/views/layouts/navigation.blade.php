@@ -15,6 +15,21 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+
+                    <!-- ✅ Tambahkan menu hanya untuk admin -->
+                    @if(auth()->check() && auth()->user()->role === 'admin')
+                        <x-nav-link :href="route('mahasiswa.index')" :active="request()->routeIs('mahasiswa.*')">
+                            {{ __('Mahasiswa') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('fakultas.index')" :active="request()->routeIs('fakultas.*')">
+                            {{ __('Fakultas') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('prodi.index')" :active="request()->routeIs('prodi.*')">
+                            {{ __('Program Studi') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -41,15 +56,20 @@
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                    onclick="event.preventDefault(); this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>
+
+                <!-- ✅ Tambahan: tampilkan role user -->
+                @if(auth()->check())
+                    <div class="text-sm text-gray-500 ml-4">
+                        Role: <strong>{{ auth()->user()->role }}</strong>
+                    </div>
+                @endif
             </div>
 
             <!-- Hamburger -->
@@ -70,6 +90,19 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+
+            <!-- ✅ Tambahkan menu admin di tampilan mobile -->
+            @if(auth()->check() && auth()->user()->role === 'admin')
+                <x-responsive-nav-link :href="route('mahasiswa.index')">
+                    {{ __('Mahasiswa') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('fakultas.index')">
+                    {{ __('Fakultas') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('prodi.index')">
+                    {{ __('Program Studi') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
@@ -77,6 +110,11 @@
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+
+                <!-- ✅ Role di mode mobile -->
+                <div class="font-medium text-sm text-gray-500">
+                    Role: <strong>{{ auth()->user()->role }}</strong>
+                </div>
             </div>
 
             <div class="mt-3 space-y-1">
@@ -87,10 +125,8 @@
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                            onclick="event.preventDefault(); this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

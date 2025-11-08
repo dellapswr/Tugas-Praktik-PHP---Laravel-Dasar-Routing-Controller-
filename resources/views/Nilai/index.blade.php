@@ -41,10 +41,12 @@
                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition">
                     ← Kembali
                 </a>
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ url('/mahasiswa/' . (is_array($mhs) ? $mhs['id'] : $mhs->id) . '/nilai/create') }}"
                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition">
                     + Tambah Nilai
                 </a>
+                @endif
             </div>
 
             {{-- Tabel Nilai --}}
@@ -70,14 +72,16 @@
                                     <td class="py-2 border">{{ is_array($n) ? $n['nilai_angka'] : $n->nilai_angka }}</td>
                                     <td class="py-2 border">{{ is_array($n) ? $n['nilai_huruf'] : $n->nilai_huruf }}</td>
                                     <td class="py-2 border flex justify-center gap-2">
-                                        <a href="{{ url('/mahasiswa/' . (is_array($mhs) ? $mhs['id'] : $mhs->id) . '/nilai/' . (is_array($n) ? $n['id'] : $n->id) . '/edit') }}" 
-                                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">Edit</a>
-                                        <form action="{{ url('/mahasiswa/' . (is_array($mhs) ? $mhs['id'] : $mhs->id) . '/nilai/' . (is_array($n) ? $n['id'] : $n->id)) }}" 
-                                              method="POST" onsubmit="return confirm('Yakin ingin menghapus nilai ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">Hapus</button>
-                                        </form>
+                                        @if(auth()->user()->role === 'admin')
+                                            <a href="{{ url('/mahasiswa/' . (is_array($mhs) ? $mhs['id'] : $mhs->id) . '/nilai/' . (is_array($n) ? $n['id'] : $n->id) . '/edit') }}" 
+                                               class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">Edit</a>
+                                            <form action="{{ url('/mahasiswa/' . (is_array($mhs) ? $mhs['id'] : $mhs->id) . '/nilai/' . (is_array($n) ? $n['id'] : $n->id)) }}" 
+                                                  method="POST" onsubmit="return confirm('Yakin ingin menghapus nilai ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">Hapus</button>
+                                            </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

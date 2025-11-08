@@ -15,13 +15,15 @@
                 </div>
             @endif
 
-            {{-- Tombol Tambah --}}
-            <div class="flex justify-end mb-5">
-                <a href="{{ route('prodi.create') }}"
-                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
-                    + Tambah Program Studi
-                </a>
-            </div>
+            {{-- Tombol Tambah hanya untuk admin --}}
+            @if(auth()->user()->role === 'admin')
+                <div class="flex justify-end mb-5">
+                    <a href="{{ route('prodi.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
+                        + Tambah Program Studi
+                    </a>
+                </div>
+            @endif
 
             {{-- Tabel --}}
             <div class="bg-white dark:bg-gray-800 shadow-lg sm:rounded-xl p-6">
@@ -32,7 +34,9 @@
                                 <th class="py-3 px-4 border w-20">ID</th>
                                 <th class="py-3 px-4 border">Nama Prodi</th>
                                 <th class="py-3 px-4 border">Fakultas</th>
-                                <th class="py-3 px-4 border w-40">Aksi</th>
+                                @if(auth()->user()->role === 'admin')
+                                    <th class="py-3 px-4 border w-40">Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -41,24 +45,26 @@
                                     <td class="py-2 border">{{ $p->id }}</td>
                                     <td class="py-2 border">{{ $p->nama_prodi }}</td>
                                     <td class="py-2 border">{{ $p->fakultas->nama_fakultas ?? '-' }}</td>
-                                    <td class="py-2 border flex justify-center gap-2">
-                                        <a href="{{ route('prodi.edit', $p->id) }}" 
-                                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
-                                           Edit
-                                        </a>
-                                        <form action="{{ route('prodi.destroy', $p->id) }}" method="POST" 
-                                              onsubmit="return confirm('Yakin ingin menghapus program studi ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </td>
+                                    @if(auth()->user()->role === 'admin')
+                                        <td class="py-2 border flex justify-center gap-2">
+                                            <a href="{{ route('prodi.edit', $p->id) }}" 
+                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('prodi.destroy', $p->id) }}" method="POST" 
+                                                onsubmit="return confirm('Yakin ingin menghapus program studi ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="text-gray-500 py-4">Belum ada data program studi.</td>
+                                    <td colspan="{{ auth()->user()->role === 'admin' ? 4 : 3 }}" class="text-gray-500 py-4">Belum ada data program studi.</td>
                                 </tr>
                             @endforelse
                         </tbody>

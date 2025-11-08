@@ -7,6 +7,7 @@
 
     <div class="py-8">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+
             {{-- Notifikasi --}}
             @if(session('success'))
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm">
@@ -59,13 +60,15 @@
                 </form>
             </div>
 
-            {{-- Tombol Tambah --}}
+            {{-- Tombol Tambah (khusus admin) --}}
+            @if(auth()->user()->role === 'admin')
             <div class="flex justify-end mb-4">
                 <a href="{{ route('mahasiswa.create') }}"
                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition">
                     + Tambah Mahasiswa
                 </a>
             </div>
+            @endif
 
             {{-- Tabel --}}
             <div class="flex justify-center">
@@ -92,13 +95,15 @@
                                     <td class="py-2 border">{{ $m->prodi->fakultas->nama_fakultas ?? '-' }}</td>
                                     <td class="py-2 border">{{ $m->prodi->nama_prodi ?? '-' }}</td>
                                     <td class="py-2 border flex justify-center gap-2">
-                                        <a href="{{ route('mahasiswa.edit', $m->id) }}" 
-                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded transition text-sm">
-                                            Edit
-                                        </a>
                                         <a href="{{ url('/mahasiswa/'.$m->id.'/nilai') }}" 
                                             class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition text-sm">
                                             Nilai
+                                        </a>
+
+                                        @if(auth()->user()->role === 'admin')
+                                        <a href="{{ route('mahasiswa.edit', $m->id) }}" 
+                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded transition text-sm">
+                                            Edit
                                         </a>
                                         <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST"
                                                 onsubmit="return confirm('Yakin ingin menghapus data ini?')">
@@ -108,6 +113,7 @@
                                                 Hapus
                                             </button>
                                         </form>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty
@@ -120,7 +126,6 @@
 
                 </div>
             </div>
-
 
     {{-- Dropdown Dinamis --}}
     <script>

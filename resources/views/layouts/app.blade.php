@@ -14,6 +14,7 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
+
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.navigation')
@@ -27,10 +28,37 @@
                 </header>
             @endisset
 
+            <!-- 🔹 Alert Notifikasi (success & error) -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                @if (session('success'))
+                    <div id="alert-success"
+                        class="mb-4 rounded-lg bg-green-100 border border-green-400 text-green-800 px-4 py-2 shadow-sm">
+                        ✅ {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div id="alert-error"
+                        class="mb-4 rounded-lg bg-red-100 border border-red-400 text-red-800 px-4 py-2 shadow-sm">
+                        ❌ {{ session('error') }}
+                    </div>
+                @endif
+            </div>
+
             <!-- Page Content -->
             <main>
                 {{ $slot }}
             </main>
         </div>
+
+        <!-- 🔹 Auto-hide alert setelah 3 detik -->
+        <script>
+            setTimeout(() => {
+                const success = document.getElementById('alert-success');
+                const error = document.getElementById('alert-error');
+                if (success) success.style.display = 'none';
+                if (error) error.style.display = 'none';
+            }, 3000);
+        </script>
     </body>
 </html>

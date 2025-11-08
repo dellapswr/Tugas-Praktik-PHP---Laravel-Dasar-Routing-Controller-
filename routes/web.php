@@ -7,11 +7,13 @@ use App\Http\Controllers\FakultasController;
 use App\Http\Controllers\ProgramStudiController;
 use App\Http\Controllers\ProfileController;
 
-// Halaman utama -> redirect ke mahasiswa
+// =====================================
+// HALAMAN UTAMA
+// =====================================
 Route::get('/', fn() => redirect('/mahasiswa'));
 
 // =====================================
-// ROUTES YANG TERPROTEKSI LOGIN
+// ROUTES UNTUK SEMUA USER LOGIN (ADMIN & USER)
 // =====================================
 Route::middleware(['auth'])->group(function () {
 
@@ -20,33 +22,53 @@ Route::middleware(['auth'])->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
-    // =====================================
-    // MAHASISWA
-    // =====================================
-    Route::resource('mahasiswa', MahasiswaController::class);
+    // Semua user login bisa melihat daftar data (read only)
+    // 🧩 Pindahkan route 'create' ke atas agar tidak ketimpa oleh '/{id}'
+    Route::get('/mahasiswa', [MahasiswaController::class, 'index'])->name('mahasiswa.index');
 
-    // Tambahan: Detail Mahasiswa (Show)
-    Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'show'])->name('mahasiswa.show');
+    // Fakultas dan Prodi (read only)
+    Route::get('/fakultas', [FakultasController::class, 'index'])->name('fakultas.index');
+    Route::get('/prodi', [ProgramStudiController::class, 'index'])->name('prodi.index');
 
-    // =====================================
-    // NILAI (nested di bawah mahasiswa)
-    // =====================================
+    // Nilai (read only)
     Route::get('/mahasiswa/{id}/nilai', [NilaiController::class, 'showByMahasiswa'])->name('nilai.index');
+
+    // API: Prodi berdasarkan Fakultas
+    Route::get('/api/fakultas/{id}/prodi', [ProgramStudiController::class, 'byFakultas']);
+});
+
+// =====================================
+// ROUTES KHUSUS UNTUK ADMIN (CRUD PENUH)
+// =====================================
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // 🧠 PENTING: Tempatkan route 'create' sebelum '/{id}'
+    Route::get('/mahasiswa/create', [MahasiswaController::class, 'create'])->name('mahasiswa.create');
+
+    // CRUD Mahasiswa
+    Route::post('/mahasiswa', [MahasiswaController::class, 'store'])->name('mahasiswa.store');
+    Route::get('/mahasiswa/{id}/edit', [MahasiswaController::class, 'edit'])->name('mahasiswa.edit');
+    Route::put('/mahasiswa/{id}', [MahasiswaController::class, 'update'])->name('mahasiswa.update');
+    Route::delete('/mahasiswa/{id}', [MahasiswaController::class, 'destroy'])->name('mahasiswa.destroy');
+
+    // Batasi route /mahasiswa/{id} agar hanya angka
+    Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'show'])
+        ->whereNumber('id')
+        ->name('mahasiswa.show');
+
+    // CRUD Nilai
     Route::get('/mahasiswa/{id}/nilai/create', [NilaiController::class, 'create'])->name('nilai.create');
     Route::post('/mahasiswa/{id}/nilai', [NilaiController::class, 'store'])->name('nilai.store');
     Route::get('/mahasiswa/{id}/nilai/{nilai_id}/edit', [NilaiController::class, 'edit'])->name('nilai.edit');
     Route::put('/mahasiswa/{id}/nilai/{nilai_id}', [NilaiController::class, 'update'])->name('nilai.update');
     Route::delete('/mahasiswa/{id}/nilai/{nilai_id}', [NilaiController::class, 'destroy'])->name('nilai.destroy');
 
-    // =====================================
-    // FAKULTAS & PROGRAM STUDI
-    // =====================================
+    // CRUD Fakultas & Prodi
     Route::resource('fakultas', FakultasController::class)
-     ->parameters(['fakultas' => 'fakultas']);
-    Route::resource('prodi', ProgramStudiController::class);
+        ->parameters(['fakultas' => 'fakultas'])
+        ->except(['index']);
 
-    // API: Prodi berdasarkan Fakultas
-    Route::get('/api/fakultas/{id}/prodi', [ProgramStudiController::class, 'byFakultas']);
+    Route::resource('prodi', ProgramStudiController::class)->except(['index']);
 });
 
 // =====================================
@@ -58,4 +80,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

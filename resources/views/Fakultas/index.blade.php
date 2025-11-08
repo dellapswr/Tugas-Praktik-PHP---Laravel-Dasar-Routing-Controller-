@@ -15,13 +15,15 @@
                 </div>
             @endif
 
-            {{-- Tombol Tambah --}}
-            <div class="flex justify-end mb-5">
-                <a href="{{ route('fakultas.create') }}"
-                   class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
-                    + Tambah Fakultas
-                </a>
-            </div>
+            {{-- Tombol Tambah hanya untuk admin --}}
+            @if(auth()->user()->role === 'admin')
+                <div class="flex justify-end mb-5">
+                    <a href="{{ route('fakultas.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded shadow transition">
+                        + Tambah Fakultas
+                    </a>
+                </div>
+            @endif
 
             {{-- Tabel --}}
             <div class="bg-white dark:bg-gray-800 shadow-lg sm:rounded-xl p-6">
@@ -31,7 +33,9 @@
                             <tr class="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
                                 <th class="py-3 px-4 border w-20">ID</th>
                                 <th class="py-3 px-4 border">Nama Fakultas</th>
-                                <th class="py-3 px-4 border w-40">Aksi</th>
+                                @if(auth()->user()->role === 'admin')
+                                    <th class="py-3 px-4 border w-40">Aksi</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -39,24 +43,26 @@
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                     <td class="py-2 border">{{ $f->id }}</td>
                                     <td class="py-2 border">{{ $f->nama_fakultas }}</td>
-                                    <td class="py-2 border flex justify-center gap-2">
-                                        <a href="{{ route('fakultas.edit', $f->id) }}" 
-                                           class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
-                                           Edit
-                                        </a>
-                                        <form action="{{ route('fakultas.destroy', $f->id) }}" method="POST" 
-                                              onsubmit="return confirm('Yakin ingin menghapus fakultas ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </td>
+                                    @if(auth()->user()->role === 'admin')
+                                        <td class="py-2 border flex justify-center gap-2">
+                                            <a href="{{ route('fakultas.edit', $f->id) }}" 
+                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded text-sm transition">
+                                                Edit
+                                            </a>
+                                            <form action="{{ route('fakultas.destroy', $f->id) }}" method="POST" 
+                                                onsubmit="return confirm('Yakin ingin menghapus fakultas ini?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition">
+                                                    Hapus
+                                                </button>
+                                            </form>
+                                        </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="3" class="text-gray-500 py-4">Belum ada data fakultas.</td>
+                                    <td colspan="{{ auth()->user()->role === 'admin' ? 3 : 2 }}" class="text-gray-500 py-4">Belum ada data fakultas.</td>
                                 </tr>
                             @endforelse
                         </tbody>

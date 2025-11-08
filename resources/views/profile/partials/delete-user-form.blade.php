@@ -1,3 +1,9 @@
+{{-- resources/views/profile/partials/delete-user-form.blade.php --}}
+@php
+    $user = Auth::user();
+@endphp
+
+@if ($user->role === 'admin')
 <section class="space-y-6">
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -12,7 +18,9 @@
     <x-danger-button
         x-data=""
         x-on:click.prevent="$dispatch('open-modal', 'confirm-user-deletion')"
-    >{{ __('Delete Account') }}</x-danger-button>
+    >
+        {{ __('Delete Account') }}
+    </x-danger-button>
 
     <x-modal name="confirm-user-deletion" :show="$errors->userDeletion->isNotEmpty()" focusable>
         <form method="post" action="{{ route('profile.destroy') }}" class="p-6">
@@ -53,3 +61,15 @@
         </form>
     </x-modal>
 </section>
+@else
+<section class="space-y-6">
+    <header>
+        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            {{ __('Delete Account (Disabled for Regular Users)') }}
+        </h2>
+        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            {{ __('As a regular user, you cannot delete your account directly. Please contact an administrator if you wish to remove your account.') }}
+        </p>
+    </header>
+</section>
+@endif
