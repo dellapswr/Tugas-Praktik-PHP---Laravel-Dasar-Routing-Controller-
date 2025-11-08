@@ -49,31 +49,51 @@ class FakultasController extends Controller
     }
 
     // PUT /api/fakultas/{id}
-    public function update(Request $request, Fakultas $fakultas)
-    {
-        $request->validate([
-            'nama_fakultas' => 'required|regex:/^[A-Za-z\s]+$/|unique:fakultas,nama_fakultas,' . $fakultas->id,
-        ]);
+    public function update(Request $request, $id)
+{
+    $fakultas = Fakultas::find($id);
 
-        $fakultas->update([
-            'nama_fakultas' => $request->nama_fakultas,
-        ]);
-
+    if (!$fakultas) {
         return response()->json([
-            'success' => true,
-            'message' => 'Fakultas berhasil diperbarui.',
-            'data' => $fakultas
-        ], 200);
+            'success' => false,
+            'message' => 'Fakultas tidak ditemukan.',
+        ], 404);
     }
+
+    $request->validate([
+        'nama_fakultas' => 'required|regex:/^[A-Za-z\s]+$/|unique:fakultas,nama_fakultas,' . $id,
+    ]);
+
+    $fakultas->update([
+        'nama_fakultas' => $request->nama_fakultas,
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fakultas berhasil diperbarui.',
+        'data' => $fakultas,
+    ], 200);
+}
+
 
     // DELETE /api/fakultas/{id}
-    public function destroy(Fakultas $fakultas)
-    {
-        $fakultas->delete();
+   public function destroy($id)
+{
+    $fakultas = Fakultas::find($id);
 
+    if (!$fakultas) {
         return response()->json([
-            'success' => true,
-            'message' => 'Fakultas berhasil dihapus.'
-        ], 200);
+            'success' => false,
+            'message' => 'Fakultas tidak ditemukan.'
+        ], 404);
     }
+
+    $fakultas->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Fakultas berhasil dihapus.'
+    ], 200);
+}
+
 }
